@@ -1,8 +1,12 @@
+'''
+conexão database
+'''
+
 import pyodbc
 
 connection_string = (
     "Driver= {ODBC Driver 11 for SQL Server};"
-    "Server=localhost;"
+    "Server=192.168.69.152;"
     "Database=DB_BackupOn_Manager;"
     "UID=SA;"
     "PWD=Extr@123;"
