@@ -1,3 +1,7 @@
+'''
+lógica de negócios e as classes para gerenciar clientes e ocorrências.
+'''
+
 import pyodbc
 from config import connection_string
 
