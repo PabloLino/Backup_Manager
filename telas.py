@@ -1,5 +1,11 @@
+'''
+config da interface do usuário
+'''
+
+import os
+import sys
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import messagebox
 from PIL import Image, ImageTk
 
 class TelaMenu(tk.Frame):
@@ -8,16 +14,21 @@ class TelaMenu(tk.Frame):
         self.master = master
         self.configure(bg='#000000')
 
-        # Carregar e centralizar a imagem
-        self.imagem_path = "C:/Users/pablo/Desktop/Gerenciamento_BackupOn/database.png"  # Ajuste o caminho da imagem, se necessário
+        # Definindo o caminho da imagem
+        if getattr(sys, 'frozen', False):
+            # Se o aplicativo estiver congelado (executável)
+            self.imagem_path = os.path.join(os.path.dirname(sys.executable), 'database.png')
+        else:
+            # Se estiver em modo de desenvolvimento
+            self.imagem_path = "C:/Users/pablo/Desktop/Gerenciamento_BackupOn/database.png"
+        
         self.img = Image.open(self.imagem_path)
-        self.img = self.img.resize((150, 150))  # Redimensiona a imagem sem Image.ANTIALIAS
+        self.img = self.img.resize((150, 150))
         self.photo = ImageTk.PhotoImage(self.img)
 
         self.label_imagem = tk.Label(self, image=self.photo, bg='#000000')
-        self.label_imagem.pack(pady=20)  # Centralizar a imagem com espaçamento
+        self.label_imagem.pack(pady=20)
 
-        # Instruções sobre o uso
         label_instrucoes = tk.Label(self, text="Escolha uma funcionalidade no menu", bg='#000000', fg='#FFC107', font=('Arial', 12))
         label_instrucoes.pack(pady=10)
 
