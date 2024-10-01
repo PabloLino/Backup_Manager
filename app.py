@@ -1,24 +1,21 @@
-'''
-classe principal da aplicação, gerenciamento das telas do aplicativo.
-'''
-
 import tkinter as tk
 from tkinter import ttk
 from sistema import Sistema
+from config import connection_string
 from telas import TelaCadastroCliente, TelaRegistrarOcorrencia, TelaConsultarClientes, TelaGerarRelatorio, TelaMenu
 
 class Aplicacao(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Gerenciador Backup Online")
-        self.geometry("900x600") # defini um tamnho da tela padrão, mas pode ser alterado, ideal é deixar reponsivo no futuro.
-        self.configure(bg='#000000')  # tema de cor do projeto, deixei preto como padrão.
+        self.geometry("900x600")
+        self.configure(bg='#000000')
 
         self.sistema = Sistema()
         self.tela_atual = None
 
         # Menu inicial
-        self.menu_frame = tk.Frame(self, bg='#000000') # cor padrão
+        self.menu_frame = tk.Frame(self, bg='#000000')
         self.menu_frame.pack(side=tk.TOP, anchor='nw', pady=10, padx=10)
 
         # Combobox para funcionalidades
@@ -34,16 +31,15 @@ class Aplicacao(tk.Tk):
     def abrir_tela(self, event):
         funcionalidade = self.combo_funcionalidades.get()
         
-        # botão menu que faz voltar para a tela inicial do projeto
         if funcionalidade == "Menu" or funcionalidade == "":
             if self.tela_atual is not None:
-                self.tela_atual.destroy()  #Destrói a tela atual, para voltar para a inicial e não ter sobreposição
+                self.tela_atual.destroy()
             self.tela_atual = TelaMenu(self)
             self.tela_atual.pack(fill=tk.BOTH, expand=True)
             return
 
         if self.tela_atual is not None:
-            self.tela_atual.destroy()  #Destrói a tela atual
+            self.tela_atual.destroy()
 
         if funcionalidade == "Cadastrar Cliente":
             self.tela_atual = TelaCadastroCliente(self)
@@ -58,4 +54,4 @@ class Aplicacao(tk.Tk):
 
 if __name__ == "__main__":
     app = Aplicacao()
-    app.mainloop() #tem que ter esse comando de loop, se não o programa roda mas não exibe a interface gráfica para o usuário
+    app.mainloop()
