@@ -1,7 +1,3 @@
-'''
-config da interface do usuário
-'''
-
 import os
 import sys
 import tkinter as tk
@@ -14,14 +10,11 @@ class TelaMenu(tk.Frame):
         self.master = master
         self.configure(bg='#000000')
 
-        # Definindo o caminho da imagem
         if getattr(sys, 'frozen', False):
-            # Se o aplicativo estiver congelado (executável)
             self.imagem_path = os.path.join(os.path.dirname(sys.executable), 'database.png')
         else:
-            # Se estiver em modo de desenvolvimento
             self.imagem_path = "C:/Users/pablo/Desktop/Gerenciamento_BackupOn/database.png"
-        
+
         self.img = Image.open(self.imagem_path)
         self.img = self.img.resize((150, 150))
         self.photo = ImageTk.PhotoImage(self.img)
@@ -73,73 +66,10 @@ class TelaCadastroCliente(tk.Frame):
         self.entry_conta_nuvem.delete(0, tk.END)
 
     def voltar_menu(self):
-        self.master.combo_funcionalidades.current(0)
         self.master.abrir_tela(None)
 
 
 class TelaRegistrarOcorrencia(tk.Frame):
-    def __init__(self, master):
-        super().__init__(master)
-        self.master = master
-        self.configure(bg='#000000')
-
-        self.label_id = tk.Label(self, text="ID do Cliente:", bg='#000000', fg='#FFC107', font=('Arial', 12))
-        self.label_id.pack()
-        self.entry_id = tk.Entry(self)
-        self.entry_id.pack()
-
-        self.label_ocorrencia = tk.Label(self, text="Descrição Ocorrência:", bg='#000000', fg='#FFC107', font=('Arial', 12))
-        self.label_ocorrencia.pack()
-        self.entry_ocorrencia = tk.Entry(self)
-        self.entry_ocorrencia.pack()
-
-        self.button_registrar = tk.Button(self, text="Registrar Ocorrência", command=self.registrar_ocorrencia, bg='#333333', fg='#FFC107', font=('Arial', 12, 'bold'))
-        self.button_registrar.pack(pady=10)
-
-        self.button_menu = tk.Button(self, text="Menu", command=self.voltar_menu, bg='#333333', fg='#FFC107', font=('Arial', 12, 'bold'))
-        self.button_menu.pack(anchor='se', padx=10, pady=10, side='bottom')
-
-    def registrar_ocorrencia(self):
-        id_cliente = self.entry_id.get()
-        descricao = self.entry_ocorrencia.get()
-
-        resultado = self.master.sistema.registrar_ocorrencia(id_cliente, descricao)
-        messagebox.showinfo("Registro de Ocorrência", resultado)
-
-        self.entry_id.delete(0, tk.END)
-        self.entry_ocorrencia.delete(0, tk.END)
-
-    def voltar_menu(self):
-        self.master.combo_funcionalidades.current(0)
-        self.master.abrir_tela(None)
-
-
-class TelaConsultarClientes(tk.Frame):
-    def __init__(self, master):
-        super().__init__(master)
-        self.master = master
-        self.configure(bg='#000000')
-
-        self.text_clientes = tk.Text(self, height=20, bg='#333333', fg='#FFC107', font=('Arial', 12))
-        self.text_clientes.pack()
-
-        self.button_consultar = tk.Button(self, text="Consultar Clientes", command=self.consultar_clientes, bg='#333333', fg='#FFC107', font=('Arial', 12, 'bold'))
-        self.button_consultar.pack(pady=10)
-
-        self.button_menu = tk.Button(self, text="Menu", command=self.voltar_menu, bg='#333333', fg='#FFC107', font=('Arial', 12, 'bold'))
-        self.button_menu.pack(anchor='se', padx=10, pady=10, side='bottom')
-
-    def consultar_clientes(self):
-        self.text_clientes.delete(1.0, tk.END)
-        for id_cliente, cliente in self.master.sistema.clientes.items():
-            self.text_clientes.insert(tk.END, f"ID: {id_cliente}, Nome: {cliente.nome_cartorio}, SAC: {cliente.nu_sac}, Nuvem: {cliente.conta_nuvem}\n")
-
-    def voltar_menu(self):
-        self.master.combo_funcionalidades.current(0)
-        self.master.abrir_tela(None)
-
-
-class TelaGerarRelatorio(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
         self.master = master
@@ -150,6 +80,76 @@ class TelaGerarRelatorio(tk.Frame):
         self.entry_id_cliente = tk.Entry(self)
         self.entry_id_cliente.pack()
 
+        self.label_descricao = tk.Label(self, text="Descrição da Ocorrência:", bg='#000000', fg='#FFC107', font=('Arial', 12))
+        self.label_descricao.pack()
+        self.entry_descricao = tk.Entry(self)
+        self.entry_descricao.pack()
+
+        self.label_solucionado = tk.Label(self, text="Solucionado (True/False):", bg='#000000', fg='#FFC107', font=('Arial', 12))
+        self.label_solucionado.pack()
+        self.entry_solucionado = tk.Entry(self)
+        self.entry_solucionado.pack()
+
+        self.button_registrar = tk.Button(self, text="Registrar Ocorrência", command=self.registrar_ocorrencia, bg='#333333', fg='#FFC107', font=('Arial', 12, 'bold'))
+        self.button_registrar.pack(pady=10)
+
+        self.button_menu = tk.Button(self, text="Menu", command=self.voltar_menu, bg='#333333', fg='#FFC107', font=('Arial', 12, 'bold'))
+        self.button_menu.pack(anchor='se', padx=10, pady=10, side='bottom')
+
+    def registrar_ocorrencia(self):
+        id_cliente = self.entry_id_cliente.get()
+        descricao = self.entry_descricao.get()
+        solucionado = self.entry_solucionado.get().strip().lower() == 'true'
+
+        resultado = self.master.sistema.registrar_ocorrencia(id_cliente, descricao, solucionado)
+        messagebox.showinfo("Registro de Ocorrência", resultado)
+
+        self.entry_id_cliente.delete(0, tk.END)
+        self.entry_descricao.delete(0, tk.END)
+        self.entry_solucionado.delete(0, tk.END)
+
+    def voltar_menu(self):
+        self.master.abrir_tela(None)
+
+
+class TelaConsultarClientes(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master)
+        self.master = master
+        self.configure(bg='#000000')
+
+        self.label_titulo = tk.Label(self, text="Clientes Cadastrados", bg='#000000', fg='#FFC107', font=('Arial', 12))
+        self.label_titulo.pack(pady=10)
+
+        self.listbox_clientes = tk.Listbox(self, width=80)
+        self.listbox_clientes.pack(pady=10)
+
+        self.button_menu = tk.Button(self, text="Menu", command=self.voltar_menu, bg='#333333', fg='#FFC107', font=('Arial', 12, 'bold'))
+        self.button_menu.pack(anchor='se', padx=10, pady=10, side='bottom')
+
+        self.carregar_clientes()
+
+    def carregar_clientes(self):
+        self.listbox_clientes.delete(0, tk.END)
+        for cliente in self.master.sistema.clientes.values():
+            self.listbox_clientes.insert(tk.END, f"ID: {cliente.id_cliente}, Nome: {cliente.nome_cartorio}, SAC: {cliente.nu_sac}, Conta: {cliente.conta_nuvem}")
+
+    def voltar_menu(self):
+        self.master.abrir_tela(None)
+
+
+class TelaGerarRelatorio(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master)
+        self.master = master
+        self.configure(bg='#000000')
+
+        self.label_titulo = tk.Label(self, text="Relatório de Ocorrências", bg='#000000', fg='#FFC107', font=('Arial', 12))
+        self.label_titulo.pack(pady=10)
+
+        self.text_relatorio = tk.Text(self, width=80, height=20)
+        self.text_relatorio.pack(pady=10)
+
         self.button_gerar = tk.Button(self, text="Gerar Relatório", command=self.gerar_relatorio, bg='#333333', fg='#FFC107', font=('Arial', 12, 'bold'))
         self.button_gerar.pack(pady=10)
 
@@ -157,13 +157,13 @@ class TelaGerarRelatorio(tk.Frame):
         self.button_menu.pack(anchor='se', padx=10, pady=10, side='bottom')
 
     def gerar_relatorio(self):
-        id_cliente = self.entry_id_cliente.get()
-
-        resultado = self.master.sistema.gerar_relatorio(id_cliente)
-        messagebox.showinfo("Gerar Relatório", resultado)
-
-        self.entry_id_cliente.delete(0, tk.END)
+        self.text_relatorio.delete(1.0, tk.END)
+        relatorio = self.master.sistema.relatorio_ocorrencias()
+        for nome_cartorio, ocorrencias in relatorio:
+            self.text_relatorio.insert(tk.END, f"Cartório: {nome_cartorio}\n")
+            for descricao, solucionado in ocorrencias:
+                self.text_relatorio.insert(tk.END, f" - {descricao} (Solucionado: {solucionado})\n")
+            self.text_relatorio.insert(tk.END, "\n")
 
     def voltar_menu(self):
-        self.master.combo_funcionalidades.current(0)
         self.master.abrir_tela(None)
