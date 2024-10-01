@@ -1,5 +1,5 @@
 '''
-lógica de negócios e as classes para gerenciar clientes e ocorrências.
+Lógica de negócios e as classes para gerenciar clientes e ocorrências.
 '''
 
 import pyodbc
@@ -47,17 +47,19 @@ class Sistema:
                     self.clientes[id_cliente].adicionar_ocorrencia(descricao, solucionado)
 
     def cadastrar_cliente(self, nome_cartorio, nu_sac, conta_nuvem):
-        novo_id = max(self.clientes.keys(), default=0) + 1
+        # Verifica se o nu_sac já está cadastrado
+        if any(cliente.nu_sac == nu_sac for cliente in self.clientes.values()):
+            return "Erro: Já existe um cliente cadastrado com este número SAC!"
 
         try:
             with self.conectar() as conn:
                 cursor = conn.cursor()
                 cursor.execute(
-                    "INSERT INTO Clientes (id_cliente, nome_cartorio, nu_sac, conta_nuvem) VALUES (?, ?, ?, ?)",
-                    (novo_id, nome_cartorio, nu_sac, conta_nuvem)
+                    "INSERT INTO Clientes (nome_cartorio, nu_sac, conta_nuvem) VALUES (?, ?, ?)",
+                    (nome_cartorio, nu_sac, conta_nuvem)
                 )
                 conn.commit()
-            self.clientes[novo_id] = Cliente(novo_id, nome_cartorio, nu_sac, conta_nuvem)
+            self.carregar_clientes()  # Recarregar clientes para incluir o novo
             return "Cliente cadastrado com sucesso!"
         except Exception as e:
             return f"Erro ao cadastrar cliente: {str(e)}"
