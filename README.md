@@ -5,6 +5,6 @@ Utilizado linguagem Python, com destaque na utilização das bibliotecas Tkinter
 ![MenuInicial](https://github.com/user-attachments/assets/ae527391-d8b6-4e23-8078-9c9312a0fa8b)
 
 
-![Colaboradores](https://github.com/PabloLino/
+![Colaboradores](https://github.com/PabloLino/     
                  https://github.com/filipeluisgg/)
 
