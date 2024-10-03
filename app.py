@@ -8,8 +8,8 @@ class Aplicacao(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Gerenciador Backup Online")
-        self.geometry("900x600")
-        self.configure(bg='#000000')
+        self.geometry("900x600")  #Defini um tamanho padrão da tela, tamanho semelhante à telinha do BKP, ideal é deixar responsivo futuramente
+        self.configure(bg='#000000') # cor oadrão do sistema
 
         self.sistema = Sistema()
         self.tela_atual = None
