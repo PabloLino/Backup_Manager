@@ -10,10 +10,7 @@ class TelaMenu(tk.Frame):
         self.master = master
         self.configure(bg='#121212')  # Cor de fundo
 
-        if getattr(sys, 'frozen', False):
-            self.imagem_path = os.path.join(os.path.dirname(sys.executable), 'database.png')
-        else:
-            self.imagem_path = os.path.join(os.path.dirname(__file__), 'database.png')
+        self.imagem_path = os.path.join(os.path.dirname(__file__), 'database.png')
 
         self.img = Image.open(self.imagem_path)
         self.img = self.img.resize((150, 150))
