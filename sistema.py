@@ -6,15 +6,20 @@ import pyodbc
 from config import connection_string
 
 class Cliente:
-    def __init__(self, id_cliente, nome_cartorio, nu_sac, conta_nuvem):
+    def __init__(self, id_cliente, nome_cartorio, nu_sac, conta_nuvem, nome_oficial, nu_telefone, email_cliente, usuario_cliente, senha_cliente):
         self.id_cliente = id_cliente
         self.nome_cartorio = nome_cartorio
         self.nu_sac = nu_sac
         self.conta_nuvem = conta_nuvem
+        self.nome_oficial = nome_oficial
+        self.nu_telefone = nu_telefone
+        self.email_cliente = email_cliente
+        self.usuario_cliente = usuario_cliente
+        self.senha_cliente = senha_cliente
         self.ocorrencias = []
 
-    def adicionar_ocorrencia(self, descricao, solucionado=False):
-        self.ocorrencias.append((descricao, solucionado))
+    def adicionar_ocorrencia(self, descricao):
+        self.ocorrencias.append((descricao))
 
 class Sistema:
     def __init__(self):
@@ -32,39 +37,46 @@ class Sistema:
     def carregar_clientes(self):
         with self.conectar() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT id_cliente, nome_cartorio, nu_sac, conta_nuvem FROM Clientes")
+            cursor.execute("SELECT id_cliente, nome_cartorio, nu_sac, conta_nuvem, nome_oficial, nu_telefone, email_cliente, usuario_cliente, senha_cliente FROM Clientes")
             for row in cursor.fetchall():
-                id_cliente, nome_cartorio, nu_sac, conta_nuvem = row
-                self.clientes[id_cliente] = Cliente(id_cliente, nome_cartorio, nu_sac, conta_nuvem)
+                id_cliente, nome_cartorio, nu_sac, conta_nuvem, nome_oficial, nu_telefone, email_cliente, usuario_cliente, senha_cliente = row
+                self.clientes[nu_sac] = Cliente(id_cliente, nome_cartorio, nu_sac, conta_nuvem, nome_oficial, nu_telefone, email_cliente, usuario_cliente, senha_cliente)
 
     def carregar_ocorrencias(self):
         with self.conectar() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT id_cliente, descricao, solucionado FROM Ocorrencias")
+            cursor.execute("SELECT id_cliente, descri_ocorrencia FROM Ocorrencias")
             for row in cursor.fetchall():
-                id_cliente, descricao, solucionado = row
+                id_cliente, descricao = row
                 if id_cliente in self.clientes:
-                    self.clientes[id_cliente].adicionar_ocorrencia(descricao, solucionado)
+                    self.clientes[id_cliente].adicionar_ocorrencia(descricao)
 
-    def cadastrar_cliente(self, nome_cartorio, nu_sac, conta_nuvem):
-        # Verifica se o nu_sac já está cadastrado
-        if any(cliente.nu_sac == nu_sac for cliente in self.clientes.values()):
-            return "Erro: Já existe um cliente cadastrado com este número SAC!"
+    def cadastrar_cliente(self, **cliente_data):
+        # Chaves do cliente
+        required_keys = ['Nome do Cartório', 'Número SAC', 'Conta Nuvem', 'Nome Oficial', 'Número de Telefone', 'Email do Cliente', 'Usuário', 'Senha'] #relação com telas.py em  def cadastrar_cliente(self): cliente_data 
+    
+        for key in required_keys:
+            if key not in cliente_data:
+                return f"Erro: '{key}' não foi fornecido!"
+
+        if any(cliente.nu_sac == cliente_data['Número SAC'] for cliente in self.clientes.values()):
+            return "Já existe um cliente cadastrado com este número SAC!"
 
         try:
             with self.conectar() as conn:
                 cursor = conn.cursor()
                 cursor.execute(
-                    "INSERT INTO Clientes (nome_cartorio, nu_sac, conta_nuvem) VALUES (?, ?, ?)",
-                    (nome_cartorio, nu_sac, conta_nuvem)
+                    "INSERT INTO Clientes (nome_cartorio, nu_sac, conta_nuvem, nome_oficial, nu_telefone, email_cliente, usuario_cliente, senha_cliente) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    (cliente_data['Nome do Cartório'], cliente_data['Número SAC'], cliente_data['Conta Nuvem'], cliente_data['Nome Oficial'],
+                    cliente_data['Número de Telefone'], cliente_data['Email do Cliente'], cliente_data['Usuário'], cliente_data['Senha'])
                 )
                 conn.commit()
-            self.carregar_clientes()  # Recarregar clientes para incluir o novo
+            self.carregar_clientes()
             return "Cliente cadastrado com sucesso!"
         except Exception as e:
             return f"Erro ao cadastrar cliente: {str(e)}"
 
-    def registrar_ocorrencia(self, id_cliente, descricao, solucionado=False):
+    def registrar_ocorrencia(self, id_cliente, descricao):
         if id_cliente not in self.clientes:
             return "Cliente não encontrado!"
 
@@ -72,11 +84,11 @@ class Sistema:
             with self.conectar() as conn:
                 cursor = conn.cursor()
                 cursor.execute(
-                    "INSERT INTO Ocorrencias (id_cliente, descricao, solucionado) VALUES (?, ?, ?)",
-                    (id_cliente, descricao, solucionado)
+                    "INSERT INTO Ocorrencias (id_cliente, descricao) VALUES (?, ?)",
+                    (id_cliente, descricao)
                 )
                 conn.commit()
-            self.clientes[id_cliente].adicionar_ocorrencia(descricao, solucionado)
+            self.clientes[id_cliente].adicionar_ocorrencia(descricao)
             return "Ocorrência registrada com sucesso!"
         except Exception as e:
             return f"Erro ao registrar ocorrência: {str(e)}"
