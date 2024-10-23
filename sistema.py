@@ -18,8 +18,8 @@ class Cliente:
         self.senha_cliente = senha_cliente
         self.ocorrencias = []
 
-    def adicionar_ocorrencia(self, descricao, solucionado=True):
-        self.ocorrencias.append((descricao, solucionado))
+    def adicionar_ocorrencia(self, descricao):
+        self.ocorrencias.append((descricao))
 
 class Sistema:
     def __init__(self):
@@ -45,11 +45,11 @@ class Sistema:
     def carregar_ocorrencias(self):
         with self.conectar() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT id_cliente, descricao, solucionado FROM Ocorrencias")
+            cursor.execute("SELECT id_cliente, descri_ocorrencia FROM Ocorrencias")
             for row in cursor.fetchall():
-                id_cliente, descricao, solucionado = row
+                id_cliente, descricao = row
                 if id_cliente in self.clientes:
-                    self.clientes[id_cliente].adicionar_ocorrencia(descricao, solucionado)
+                    self.clientes[id_cliente].adicionar_ocorrencia(descricao)
 
     def cadastrar_cliente(self, **cliente_data):
         # Chaves do cliente
@@ -76,7 +76,7 @@ class Sistema:
         except Exception as e:
             return f"Erro ao cadastrar cliente: {str(e)}"
 
-    def registrar_ocorrencia(self, id_cliente, descricao, solucionado=False):
+    def registrar_ocorrencia(self, id_cliente, descricao):
         if id_cliente not in self.clientes:
             return "Cliente não encontrado!"
 
@@ -84,11 +84,11 @@ class Sistema:
             with self.conectar() as conn:
                 cursor = conn.cursor()
                 cursor.execute(
-                    "INSERT INTO Ocorrencias (id_cliente, descricao, solucionado) VALUES (?, ?, ?)",
-                    (id_cliente, descricao, solucionado)
+                    "INSERT INTO Ocorrencias (id_cliente, descricao) VALUES (?, ?)",
+                    (id_cliente, descricao)
                 )
                 conn.commit()
-            self.clientes[id_cliente].adicionar_ocorrencia(descricao, solucionado)
+            self.clientes[id_cliente].adicionar_ocorrencia(descricao)
             return "Ocorrência registrada com sucesso!"
         except Exception as e:
             return f"Erro ao registrar ocorrência: {str(e)}"

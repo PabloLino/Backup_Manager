@@ -6,10 +6,10 @@ import pyodbc
 
 connection_string = (
     "Driver= {ODBC Driver 11 for SQL Server};" #deve-se conferir para ver qual drive está instlado no pc
-    "Server=***.***.**.***;"   #ip do pc
+    "Server=192.168.69.152;"   #ip do pc
     "Database=DB_BackupOn_Manager;"
     "UID=SA;"
-    "PWD=********;" #senha
+    "PWD=Extr@123;" #senha
 )
 
 try:
