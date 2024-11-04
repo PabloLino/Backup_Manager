@@ -1,0 +1,8 @@
+pyinstaller --onefile --noconsole --add-data "database.png;." --add-data "favicon1.ico;." --icon=favicon1.ico --name BackupManager app.py
+#att
+pyinstaller --onefile --noconsole --add-data "database.png;." --add-data "favicon1.ico;." --add-data "chave-eletronica.png;." --icon=favicon1.ico --name BackupManager app.py
+
+
+pyinstaller --onefile --noconsole --add-data "database.png;." --add-data "favicon1.ico;." --icon=favicon1.ico --name BackupManager app.py
+
+
