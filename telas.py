@@ -1,13 +1,12 @@
 import locale
 import os
+import subprocess
 import sys
 import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 from tkcalendar import DateEntry
 
-
-import tkinter as tk
 
 class TelaLogin(tk.Frame):
 
@@ -72,22 +71,33 @@ class TelaMenu(tk.Frame):
         self.master = master
         self.configure(bg='#121212')  # Cor de fundo
 
+        # Imagem
         self.imagem_path = os.path.join(os.path.dirname(__file__), 'database.png')
-
         self.img = Image.open(self.imagem_path)
         self.img = self.img.resize((150, 150))
         self.photo = ImageTk.PhotoImage(self.img)
 
         self.label_imagem = tk.Label(self, image=self.photo, bg='#121212')
-        self.label_imagem.pack(pady=20)
+        self.label_imagem.place(relx=0.5, rely=0.35, anchor='center')  # Centraliza a imagem com ajuste
 
         tipo_usuario = "Administrador do Backup Manager" if self.master.usuario_logado == "admin" else "Visitante"
-        
+
         label_bem_vindo = tk.Label(self, text=f"Bem-vindo, {tipo_usuario}", bg='#121212', fg='#FFC107', font=('Arial', 14, 'bold'))
-        label_bem_vindo.pack(pady=10)
+        label_bem_vindo.place(relx=0.49, rely=0.45, anchor='center')  # Ajustado para menor espaçamento
 
         label_instrucoes = tk.Label(self, text="Escolha uma funcionalidade no menu", bg='#121212', fg='#FFC107', font=('Arial', 14, 'bold'))
-        label_instrucoes.pack(pady=10)
+        label_instrucoes.place(relx=0.49, rely=0.5, anchor='center')  # Ajustado para menor espaçamento
+
+        # Botão "Trocar usuário"
+        #botao_trocar_usuario = tk.Button(self, text="Trocar usuário", command=self.trocar_usuario, bg='#FFC107', fg='black', font=('Arial', 12, 'bold'))
+        #botao_trocar_usuario.place(relx=0.95, rely=0.05, anchor='ne')  # Canto superior direito
+
+        self.pack(expand=True, fill='both')
+
+    def trocar_usuario(self):
+        # Chama a função de logout e volta para a tela de login
+        self.master.usuario_logado = None
+        self.master.abrir_tela_login()  # Certifique-se de usar o nome correto do método
 
 
 class TelaCadastroCliente(tk.Frame):
@@ -104,19 +114,21 @@ class TelaCadastroCliente(tk.Frame):
         self.create_label_entry("Número SAC Formato 0000:")
         self.create_combobox("UF", ["SC", "PR", "PA", "MA", "AC"])
         self.create_combobox("Conta Nuvem",
-        ["backup@extradigital-backup.com", "backup2@extradigital-backup.com", "backup3@extradigital-backup.com", "backup4@extradigital-backup.com", "backup5@extradigital-backup.com", "backup7@extradigital-backup.com", "backup8@extradigital-backup.com", "backup9@extradigital-backup.com", "backup10@extradigital-backup.com"])
+        ["backup@extradigital-backup.com", "backup2@extradigital-backup.com", "backup3@extradigital-backup.com", "backup4@extradigital-backup.com", "backup5@extradigital-backup.com", "backup6@extradigital-backup.com", "backup7@extradigital-backup.com", "backup8@extradigital-backup.com", "backup9@extradigital-backup.com", "backup10@extradigital-backup.com"])
         self.create_label_entry("Nome Oficial:")
         self.create_label_entry("Número de Telefone:")
         self.create_label_entry("Número Do Telefone 2:")
         self.create_label_entry("Email do Cliente:")
         self.create_label_entry("Usuário:")
         self.create_label_entry("Senha:")
+        self.create_label_entry("Horário Backup Diário")
 
         self.botao_cadastrar = tk.Button(self, text="Cadastrar Cliente", command=self.cadastrar_cliente, bg='#FFC107', fg='black', font=('Arial', 12, 'bold'))
         self.botao_cadastrar.pack(pady=20)
 
         self.botao_menu = tk.Button(self, text="Menu", command=self.voltar_menu, bg='#FFC107', fg='black', font=('Arial', 12, 'bold'))
         self.botao_menu.pack(side=tk.BOTTOM, anchor='se', padx=10, pady=10)
+        
     #a função a seguir, é para todos os campos da tela de cadastro, ou seja, a edição dos campos é de forma conjunta.
     def create_label_entry(self, text, show=None):
         label = tk.Label(self, text=text, bg='#121212', fg='#FFC107', font=('Arial', 12))
@@ -146,7 +158,8 @@ class TelaCadastroCliente(tk.Frame):
             "Número Do Telefone 2": self.entry_número_do_telefone_2.get(),
             "Email do Cliente": self.entry_email_do_cliente.get(),
             "Usuário": self.entry_usuário.get(),
-            "Senha": self.entry_senha.get()
+            "Senha": self.entry_senha.get(),
+            "Horário Backup Diário": self.entry_horário_backup_diário.get()
     }
 
         if not cliente_data["Número SAC Formato 0000"].isdigit() or len(cliente_data["Número SAC Formato 0000"]) != 4:
@@ -177,13 +190,17 @@ class TelaRegistrarOcorrencia(tk.Frame):
         self.master = master
         self.configure(bg='#121212')
 
-        # Título da tela
-        self.titulo = tk.Label(self, text="Registro de Ocorrências de Backup", bg='#121212', fg='#FFC107', font=('Arial', 16, 'bold'))
-        self.titulo.grid(row=0, column=0, columnspan=2, pady=10)
+        # Frame para centralizar o título
+        self.frame_titulo = tk.Frame(self, bg='#121212')  # Fundo preto para o frame do título
+        self.frame_titulo.grid(row=0, column=0, columnspan=2, sticky="n", pady=20)  # Adicionando o título no topo com espaçamento
 
-        # Configuração da grid para expandir conforme a janela aumenta
-        for i in range(2):
-            self.columnconfigure(i, weight=1)
+        # Título centralizado dentro do frame
+        self.titulo = tk.Label(self.frame_titulo, text="Registro de Ocorrências de Backup", bg='#121212', fg='#FFC107', font=('Arial', 16, 'bold'))
+        self.titulo.pack()  # Centraliza o título dentro do frame
+
+        # Configuração da grid principal para os outros componentes
+        self.grid_columnconfigure(0, weight=1)  # coluna para o botão no canto esquerdo
+        self.grid_columnconfigure(1, weight=1)  # coluna central para outros componentes
 
         # Nº SAC do Cliente
         self.label_id_cliente = tk.Label(self, text="Nº SAC do Cliente:\n(Formato 0000)", bg='#121212', fg='#FFC107', font=('Arial', 12))
@@ -200,7 +217,7 @@ class TelaRegistrarOcorrencia(tk.Frame):
         # Tipo Da Ocorrência
         self.label_tipeocorrencia = tk.Label(self, text="Tipo Da Ocorrência:", bg='#121212', fg='#FFC107', font=('Arial', 12))
         self.label_tipeocorrencia.grid(row=3, column=0, sticky="e", padx=5, pady=5)
-        self.combobox_tipeocorrencia = ttk.Combobox(self, values=["Não subiu para a nuvem", "Backup não executado"], state="readonly", width=33)
+        self.combobox_tipeocorrencia = ttk.Combobox(self, values=["Não subiu para a nuvem", "Backup não executado", "SAC"], state="readonly", width=33)
         self.combobox_tipeocorrencia.grid(row=3, column=1, sticky="w", padx=5, pady=5)
 
         # Descrição
@@ -209,13 +226,14 @@ class TelaRegistrarOcorrencia(tk.Frame):
         self.combobox_DescriOcorrencia = ttk.Combobox(
             self,
             values=[
-                "Backup executado, mas não subiu para a nuvem",
                 "Ativação do Serviço de Backup Online",
                 "Serviço ok, mas não conclui upload",
                 "Não rodou backup do dia anterior",
+                "Backup executado, mas não subiu",
                 "Servidor do cliente estragou",
                 "Relatório SAC desatualizado",
-                "Executado mas não subiu",
+                "Cliente usando o servidor",
+                "Deixou de ser cliente",
                 "Sem espaço em disco",
                 "Servidor sem acesso",
                 "Banco corrompido",
@@ -286,23 +304,34 @@ class TelaRegistrarOcorrencia(tk.Frame):
         solucionado = self.combobox_solucionado.get()
         data_ocorrencia = self.data_ocorrencia.get_date().strftime("%Y/%m/%d")  # Formato yyyy/mm/dd
 
-        # Registrar a ocorrência no sistema e adicionar na tabela
-        resultado = self.master.sistema.registrar_ocorrencia(id_cliente, tipo_banco, tipo_ocorrencia, descricao, solucionado, data_ocorrencia)
-        messagebox.showinfo("Registro de Ocorrência", resultado)
+    # Registrar a ocorrência no sistema e verificar o resultado
+        resultado = self.master.sistema.registrar_ocorrencia(
+            id_cliente, tipo_banco, tipo_ocorrencia, descricao, solucionado, data_ocorrencia
+        )
+
+        if resultado == "Ocorrência registrada com sucesso!":
+        # Exibe mensagem de sucesso
+            messagebox.showinfo("Registro de Ocorrência", resultado)
 
         # Adiciona a nova ocorrência na tabela estilo Excel
-        self.tree.insert("", "end", values=(id_cliente, tipo_banco, tipo_ocorrencia, descricao, solucionado, data_ocorrencia))
+            self.tree.insert("", "end", values=(id_cliente, tipo_banco, tipo_ocorrencia, descricao, solucionado, data_ocorrencia))
 
         # Limpar campos
-        self.entry_id_cliente.delete(0, tk.END)
-        self.combobox_tipo_banco.set('')
-        self.combobox_tipeocorrencia.set('')
-        self.combobox_DescriOcorrencia.set('')
-        self.combobox_solucionado.set('')
-    
+            self.entry_id_cliente.delete(0, tk.END)
+            self.combobox_tipo_banco.set('')
+            self.combobox_tipeocorrencia.set('')
+            self.combobox_DescriOcorrencia.set('')
+            self.combobox_solucionado.set('')
+        else:
+        # Não exibe outra mensagem, pois o erro já foi tratado no sistema.py
+            pass
+
+
+
     def voltar_menu(self):
         self.master.combo_funcionalidades.set("Menu")
         self.master.abrir_tela(None)
+
 
 class TelaConsultarClientes(tk.Frame):
     def __init__(self, master):
@@ -346,6 +375,7 @@ class TelaConsultarClientes(tk.Frame):
                          f"EMAIL                  --> {cliente.email_cliente}\n"
                          f"CONTA NUVEM --> {cliente.conta_nuvem}\n"
                          f"OFICIAL               --> {cliente.nome_oficial}\n"
+                         f"HORÁRIO BACKUP\nDIÁRIO                 --> {cliente.hr_backup_diario}\n"
                          f"LOGIN                  --> {cliente.usuario_cliente}\n"
                          f"SENHA                --> {cliente.senha_cliente}")
         else:
@@ -359,7 +389,7 @@ class TelaConsultarClientes(tk.Frame):
         self.master.abrir_tela(None)
 
 
-class TelaGerarRelatorio(tk.Frame):
+class TelaConsultarOcorrencia(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
         self.master = master
@@ -378,55 +408,67 @@ class TelaGerarRelatorio(tk.Frame):
         self.label_data_inicio = tk.Label(self, text="Data Início", bg='#121212', fg='#FFC107', font=('Arial', 12))
         self.label_data_inicio.pack(pady=5)
         self.data_inicio = DateEntry(self, width=12,
-            background='#333333',       # Fundo do campo de entrada do calendário
-            foreground='#FFC107',       # Cor do texto do campo de entrada do calendário
-            borderwidth=2,
-            year=2024,
-            date_pattern='y-mm-dd',     # Formato de data yyyy-mm-dd
-            font=('Arial', 12),
-            headersbackground='#333333', # Fundo do cabeçalho (mês e dias da semana)
-            headersforeground='#FFC107', # Cor do texto do cabeçalho
-            weekendbackground='#8B0000', # Fundo dos finais de semana
-            weekendforeground='#FFC107', # Texto dos finais de semana
-            normalbackground='#121212',  # Fundo dos dias normais
-            normalforeground='#FFC107',  # Texto dos dias normais
-            selectbackground='#FFC107',  # Fundo da data selecionada
-            selectforeground='#000000'   # Texto da data selecionada
-        )
+                                     background='#333333',
+                                     foreground='#FFC107',
+                                     borderwidth=2,
+                                     year=2024,
+                                     date_pattern='y-mm-dd',
+                                     font=('Arial', 12),
+                                     headersbackground='#333333',
+                                     headersforeground='#FFC107',
+                                     weekendbackground='#8B0000',
+                                     weekendforeground='#FFC107',
+                                     normalbackground='#121212',
+                                     normalforeground='#FFC107',
+                                     selectbackground='#FFC107',
+                                     selectforeground='#000000')
         self.data_inicio.pack(pady=5)
 
         self.label_data_fim = tk.Label(self, text="Data Fim", bg='#121212', fg='#FFC107', font=('Arial', 12))
         self.label_data_fim.pack(pady=5)
         self.data_fim = DateEntry(self, width=12,
-            background='#333333',       # Fundo do campo de entrada do calendário
-            foreground='#FFC107',       # Cor do texto do campo de entrada do calendário
-            borderwidth=2,
-            year=2024,
-            date_pattern='y-mm-dd',     # Formato de data yyyy-mm-dd
-            font=('Arial', 12),
-            headersbackground='#333333', # Fundo do cabeçalho (mês e dias da semana)
-            headersforeground='#FFC107', # Cor do texto do cabeçalho
-            weekendbackground='#8B0000', # Fundo dos finais de semana
-            weekendforeground='#FFC107', # Texto dos finais de semana
-            normalbackground='#121212',  # Fundo dos dias normais
-            normalforeground='#FFC107',  # Texto dos dias normais
-            selectbackground='#FFC107',  # Fundo da data selecionada
-            selectforeground='#000000'   # Texto da data selecionada
-        )
+                                  background='#333333',
+                                  foreground='#FFC107',
+                                  borderwidth=2,
+                                  year=2024,
+                                  date_pattern='y-mm-dd',
+                                  font=('Arial', 12),
+                                  headersbackground='#333333',
+                                  headersforeground='#FFC107',
+                                  weekendbackground='#8B0000',
+                                  weekendforeground='#FFC107',
+                                  normalbackground='#121212',
+                                  normalforeground='#FFC107',
+                                  selectbackground='#FFC107',
+                                  selectforeground='#000000')
         self.data_fim.pack(pady=5)
 
-        # Área de texto para exibir o relatório
-        self.text_relatorio = tk.Text(self, width=80, height=20, bg='#2C2C2C', fg='#FFC107', font=('Arial', 12))
-        self.text_relatorio.pack(pady=20)
-
         # Botão para gerar o relatório
-        self.botao_gerar = tk.Button(self, text="Gerar Relatório", command=self.gerar_relatorio, bg='#FFC107', fg='black', font=('Arial', 12, 'bold'))
-        self.botao_gerar.pack(pady=20)
+        self.botao_gerar = tk.Button(self, text="Consultar Ocorrências", command=self.gerar_relatorio, bg='#FFC107', fg='black', font=('Arial', 12, 'bold'))
+        self.botao_gerar.pack(pady=10)  # Espaçamento ajustado
 
-        # Botão para voltar ao menu
-        self.botao_menu = tk.Button(self, text="Menu", command=self.voltar_menu, bg='#FFC107', fg='black', font=('Arial', 12, 'bold'))
-        self.botao_menu.pack(side=tk.BOTTOM, anchor='se', padx=10, pady=10)
+        # Frame para o relatório e scrollbar
+        frame_relatorio = tk.Frame(self, bg='#121212')
+        frame_relatorio.pack(pady=20)
 
+        # Área de texto para exibir o relatório com scrollbar
+        self.text_relatorio = tk.Text(frame_relatorio, width=80, height=15, bg='#2C2C2C', fg='#FFC107', font=('Arial', 12), wrap='word')
+        scrollbar = tk.Scrollbar(frame_relatorio, command=self.text_relatorio.yview)
+        self.text_relatorio.config(yscrollcommand=scrollbar.set)
+
+         # Botão para voltar ao menu, agora dentro do grid
+        self.botao_menu = tk.Button(frame_relatorio, text="Menu", command=self.voltar_menu, bg='#FFC107', fg='black', font=('Arial', 12, 'bold'))
+        self.botao_menu.grid(row=1, column=0, sticky='e', padx=10, pady=10)
+        
+        # Posiciona a área de texto e a scrollbar
+        self.text_relatorio.grid(row=0, column=0, sticky='nsew')
+        scrollbar.grid(row=0, column=1, sticky='ns')
+
+        # Expansão do frame para acomodar o redimensionamento
+        frame_relatorio.grid_columnconfigure(0, weight=1)
+        frame_relatorio.grid_rowconfigure(0, weight=1)
+
+        
     def gerar_relatorio(self):
         # Captura os valores dos filtros
         nu_sac = self.entry_sac.get()
@@ -444,7 +486,6 @@ class TelaGerarRelatorio(tk.Frame):
             self.text_relatorio.insert(tk.END, relatorio)
         else:
             self.text_relatorio.insert(tk.END, "Nenhuma ocorrência encontrada para os filtros fornecidos.")
-
 
     def voltar_menu(self):
         self.master.combo_funcionalidades.set("Menu")

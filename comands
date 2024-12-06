@@ -1,0 +1,1 @@
+pyinstaller --onefile --windowed --icon=favicon1.ico --add-data="favicon1.ico;." --add-data="chave-eletronica.png;." --add-data="database.png;." app.py

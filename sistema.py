@@ -1,8 +1,11 @@
+from tkinter import messagebox
 import pyodbc
+import sys 
+import os
 from config import connection_string
 
 class Cliente:
-    def __init__(self, id_cliente, nome_cartorio, nu_sac, uf, conta_nuvem, nome_oficial, nu_telefone, nu_telefone2, email_cliente, usuario_cliente, senha_cliente):
+    def __init__(self, id_cliente, nome_cartorio, nu_sac, uf, conta_nuvem, nome_oficial, nu_telefone, nu_telefone2, email_cliente, usuario_cliente, senha_cliente, hr_backup_diario):
         self.id_cliente = id_cliente
         self.nome_cartorio = nome_cartorio
         self.nu_sac = nu_sac
@@ -14,6 +17,7 @@ class Cliente:
         self.email_cliente = email_cliente
         self.usuario_cliente = usuario_cliente
         self.senha_cliente = senha_cliente
+        self.hr_backup_diario = hr_backup_diario
         self.ocorrencias = []
 
     def adicionar_ocorrencia(self, tipo_banco, tipeocorrencia, DescriOcorrencia, solucionado):
@@ -35,10 +39,10 @@ class Sistema:
     def carregar_clientes(self):
         with self.conectar() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT id_cliente, nome_cartorio, nu_sac, uf, conta_nuvem, nome_oficial, nu_telefone, nu_telefone2, email_cliente, usuario_cliente, senha_cliente FROM Clientes")
+            cursor.execute("SELECT id_cliente, nome_cartorio, nu_sac, uf, conta_nuvem, nome_oficial, nu_telefone, nu_telefone2, email_cliente, usuario_cliente, senha_cliente, hr_backup_diario FROM Clientes")
             for row in cursor.fetchall():
-                id_cliente, nome_cartorio, nu_sac, uf, conta_nuvem, nome_oficial, nu_telefone, nu_telefone2, email_cliente, usuario_cliente, senha_cliente = row
-                self.clientes[nu_sac] = Cliente(id_cliente, nome_cartorio, nu_sac, uf, conta_nuvem, nome_oficial, nu_telefone, nu_telefone2, email_cliente, usuario_cliente, senha_cliente)
+                id_cliente, nome_cartorio, nu_sac, uf, conta_nuvem, nome_oficial, nu_telefone, nu_telefone2, email_cliente, usuario_cliente, senha_cliente, hr_backup_diario = row
+                self.clientes[nu_sac] = Cliente(id_cliente, nome_cartorio, nu_sac, uf, conta_nuvem, nome_oficial, nu_telefone, nu_telefone2, email_cliente, usuario_cliente, senha_cliente, hr_backup_diario)
 
     def carregar_ocorrencias(self):
         with self.conectar() as conn:
@@ -52,7 +56,7 @@ class Sistema:
     def cadastrar_cliente(self, **cliente_data):
         #relação com telas.py em  def cadastrar_cliente(self): cliente_data 
         # Chaves do cliente
-        required_keys = ['Cartório', 'Número SAC Formato 0000', 'UF', 'Conta Nuvem', 'Nome Oficial', 'Número de Telefone', 'Número Do Telefone 2', 'Email do Cliente', 'Usuário', 'Senha'] 
+        required_keys = ['Cartório', 'Número SAC Formato 0000', 'UF', 'Conta Nuvem', 'Nome Oficial', 'Número de Telefone', 'Número Do Telefone 2', 'Email do Cliente', 'Usuário', 'Senha', 'Horário Backup Diário'] 
     
         for key in required_keys:
             if key not in cliente_data:
@@ -65,14 +69,37 @@ class Sistema:
 
         if any(cliente.nu_sac == cliente_data['Número SAC Formato 0000'] for cliente in self.clientes.values()):
             return "Já existe um cliente cadastrado com este número SAC!"
+        
+             # Formatar o horário de backup para garantir que esteja no formato HH:MM
+        try:
+            horario_backup = cliente_data['Horário Backup Diário']
+        
+        # Garantir que o horário tenha o formato correto de HH:MM
+            if len(horario_backup) == 5 and horario_backup[2] == ':':
+            # Adiciona os segundos como 00
+                horario_backup = f"{horario_backup}:00"
+            else:
+                return "O horário deve estar no formato HH:MM"
+        
+        # Remover a parte dos milissegundos caso haja algum
+            horario_backup = horario_backup.split('.')[0]
+        
+        except Exception as e:
+            return f"Erro ao formatar o horário: {str(e)}"
+        
+    
+        for key, value in cliente_data.items():
+            if value == '':
+                cliente_data[key] = None
+
 
         try:
             with self.conectar() as conn:
                 cursor = conn.cursor()
                 cursor.execute(
-                    "INSERT INTO Clientes (nome_cartorio, nu_sac, uf, conta_nuvem, nome_oficial, nu_telefone, nu_telefone2, email_cliente, usuario_cliente, senha_cliente) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO Clientes (nome_cartorio, nu_sac, uf, conta_nuvem, nome_oficial, nu_telefone, nu_telefone2, email_cliente, usuario_cliente, senha_cliente, hr_backup_diario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     (cliente_data['Cartório'], cliente_data['Número SAC Formato 0000'], cliente_data['UF'], cliente_data['Conta Nuvem'], cliente_data['Nome Oficial'],
-                    cliente_data['Número de Telefone'], cliente_data['Número Do Telefone 2'], cliente_data['Email do Cliente'], cliente_data['Usuário'], cliente_data['Senha'])
+                    cliente_data['Número de Telefone'], cliente_data['Número Do Telefone 2'], cliente_data['Email do Cliente'], cliente_data['Usuário'], cliente_data['Senha'], cliente_data['Horário Backup Diário'])
                 )
                 conn.commit()
             self.carregar_clientes()
@@ -81,8 +108,17 @@ class Sistema:
             return f"Erro ao cadastrar cliente: {str(e)}"
 
     def registrar_ocorrencia(self, id_cliente, tipo_banco, tipeocorrencia, DescriOcorrencia, solucionado, data_ocorrencia):
+    # Substitui valores vazios por None
+        tipo_banco = tipo_banco if tipo_banco else None
+        tipeocorrencia = tipeocorrencia if tipeocorrencia else None
+        DescriOcorrencia = DescriOcorrencia if DescriOcorrencia else None
+        solucionado = solucionado if solucionado else None
+        data_ocorrencia = data_ocorrencia if data_ocorrencia else None
+
+    # Verificar se o cliente existe no dicionário
         if id_cliente not in self.clientes:
-            return "Cliente não encontrado!"
+            messagebox.showerror("Erro", "Cliente não encontrado! Verifique o Nº SAC.")
+            return "Cliente não encontrado!"  # Retorna a mensagem de erro
 
         try:
             with self.conectar() as conn:
@@ -92,11 +128,17 @@ class Sistema:
                     (id_cliente, tipo_banco, tipeocorrencia, DescriOcorrencia, solucionado, data_ocorrencia)
                 )
                 conn.commit()
+
+        # Adiciona a ocorrência ao cliente
             self.clientes[id_cliente].adicionar_ocorrencia(tipo_banco, tipeocorrencia, DescriOcorrencia, solucionado)
             return "Ocorrência registrada com sucesso!"
         except Exception as e:
-            return f"Erro ao registrar ocorrência: {str(e)}"
+            messagebox.showerror("Erro", f"Erro ao registrar ocorrência: {str(e)}")
+            return f"Erro ao registrar ocorrência: {str(e)}"  # Retorna a mensagem de erro
+
+
         
+
 
 
 
