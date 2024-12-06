@@ -2,10 +2,10 @@ import pyodbc
 
 connection_string = (
     "Driver={ODBC Driver 11 for SQL Server};"
-    "Server=192.168.69.3;"  
+    "Server=*******;"  
     "Database=DB_BackupOn_Manager;"  
-    "UID=Extradigital;"  
-    "PWD=Extr@123;"  
+    "UID=****;"  
+    "PWD=E***;"  
 )
 
 try:
