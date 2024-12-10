@@ -144,45 +144,62 @@ class Sistema:
 
     def relatorio_ocorrencias(self, nu_sac=None, data_inicio=None, data_fim=None):
         try:
-            with self.conectar() as conn:  #Usando o método conectar()
+            with self.conectar() as conn:  # Usando o método conectar()
                 cursor = conn.cursor()
 
-            #Consulta SQL para visualização do relatório
+            # Consulta SQL para visualização do relatório
                 query = """
-                SELECT o.id_cliente, o.tipo_ocorrencia, o.data_ocorrencia, o.tipo_banco
+                SELECT o.id_cliente, o.data_ocorrencia, o.tipo_banco, o.tipo_ocorrencia 
                 FROM Ocorrencias o
                 JOIN Clientes c ON o.id_cliente = c.nu_sac
                 WHERE 1=1
                 """
                 params = []
 
-            #Filtro
+            # Filtro
                 if nu_sac:
                     query += " AND o.id_cliente = ?"
                     params.append(nu_sac)
 
-            #Filtro data início
+            # Filtro data início
                 if data_inicio:
                     query += " AND o.data_ocorrencia >= ?"
                     params.append(data_inicio)
 
-            #Filtro data fim
+            # Filtro data fim
                 if data_fim:
                     query += " AND o.data_ocorrencia <= ?"
                     params.append(data_fim)
-
 
                 cursor.execute(query, params)
                 resultados = cursor.fetchall()
 
             # Verificação
                 if resultados:
-                    relatorio = "SAC | Tipo Ocorrência | Data Ocorrência | Tipo Banco\n"
-                    relatorio += "-" * 90 + "\n"
+                # Defina os tamanhos fixos para cada coluna
+                    col_sac_width = 10
+                    col_data_width = 20  # Pode precisar de mais espaço dependendo do formato da data
+                    col_tipo_banco_width = 15
+                    col_tipo_ocorrencia_width = 25
+
+# Altere também o cabeçalho e os dados para refletir os tamanhos consistentes
+                    relatorio = (
+                        f"{'SAC'.ljust(col_sac_width)}| "
+                        f"{'Data Ocorrência'.ljust(col_data_width)}| "
+                        f"{'Tipo Banco'.ljust(col_tipo_banco_width)}| "
+                        f"{'Tipo Ocorrência'.ljust(col_tipo_ocorrencia_width)}\n"
+                        )
+                    relatorio += "-" * (col_sac_width + col_data_width + col_tipo_banco_width + col_tipo_ocorrencia_width + 10) + "\n"
+
                     for row in resultados:
-                        relatorio += f"{row[0]} | {row[1]} | {row[2]} | {row[3]}\n"
+                        relatorio += (
+                            f"{str(row[0]).ljust(col_sac_width)}| "
+                            f"{str(row[1]).ljust(col_data_width)}| "
+                            f"{str(row[2]).ljust(col_tipo_banco_width)}| "
+                            f"{str(row[3]).ljust(col_tipo_ocorrencia_width)}\n"
+                        )
                 else:
-                    relatorio = ""  #vazio se não houver resultados
+                    relatorio = "Nenhum resultado encontrado."
 
                 return relatorio
 
