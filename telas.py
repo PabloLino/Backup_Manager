@@ -249,9 +249,9 @@ class TelaRegistrarOcorrencia(tk.Frame):
         self.combobox_solucionado = ttk.Combobox(self, values=["NÃO", "SIM"], state="readonly", width=33)
         self.combobox_solucionado.grid(row=5, column=1, sticky="w", padx=5, pady=5)
 
-        # Configuração de "Data da Ocorrência" com as cores especificadas
+        # Configuração de "Data da Análise da Ocorrência" com as cores especificadas
         locale.setlocale(locale.LC_ALL, 'pt_BR')
-        self.label_data_ocorrencia = tk.Label(self, text="Data da Ocorrência:", bg='#121212', fg='#FFC107', font=('Arial', 12))
+        self.label_data_ocorrencia = tk.Label(self, text="Data da Análise da Ocorrência:", bg='#121212', fg='#FFC107', font=('Arial', 12))
         self.label_data_ocorrencia.grid(row=6, column=0, sticky="e", padx=5, pady=5)
 
         # Estilização do DateEntry
@@ -284,7 +284,7 @@ class TelaRegistrarOcorrencia(tk.Frame):
         self.tree.heading("tipo_ocorrencia", text="Tipo da Ocorrência")
         self.tree.heading("descricao", text="Descrição")
         self.tree.heading("solucionado", text="Solucionado")
-        self.tree.heading("data_ocorrencia", text="Data da Ocorrência")
+        self.tree.heading("data_ocorrencia", text="Data da Análise da Ocorrência")
         self.tree.grid(row=8, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
 
         # Configura a scrollbar para a tabela
@@ -452,7 +452,13 @@ class TelaConsultarOcorrencia(tk.Frame):
         frame_relatorio.pack(pady=20)
 
         # Área de texto para exibir o relatório com scrollbar
-        self.text_relatorio = tk.Text(frame_relatorio, width=80, height=15, bg='#2C2C2C', fg='#FFC107', font=('Arial', 12), wrap='word')
+        self.text_relatorio = tk.Text(frame_relatorio, 
+                              width=80, 
+                              height=15, 
+                              bg='#2C2C2C', 
+                              fg='#FFC107', 
+                              font=('Courier', 12),  # Fonte monoespaçada
+                              wrap='none')  # Desativa a quebra automática de linha
         scrollbar = tk.Scrollbar(frame_relatorio, command=self.text_relatorio.yview)
         self.text_relatorio.config(yscrollcommand=scrollbar.set)
 
