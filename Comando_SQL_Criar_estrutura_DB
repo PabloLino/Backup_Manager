@@ -1,0 +1,65 @@
+IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'DB_BackupOn_Manager_para_teste')
+BEGIN
+    CREATE DATABASE DB_BackupOn_Manager_para_teste;
+END
+GO
+
+USE DB_BackupOn_Manager_para_teste;
+GO
+
+CREATE TABLE dbo.Clientes (
+    ID_CLIENTE INT IDENTITY(1,1) PRIMARY KEY,  -- PK já cria um índice clustered automaticamente
+    NOME_CARTORIO NVARCHAR(255) NULL,
+    NU_SAC NVARCHAR(50) NULL UNIQUE,
+    CONTA_NUVEM NVARCHAR(255) NULL,
+    NOME_OFICIAL VARCHAR(50) NULL,
+    NU_TELEFONE VARCHAR(25) NULL,
+    EMAIL_CLIENTE NVARCHAR(255) NULL,
+    USUARIO_CLIENTE VARCHAR(50) NULL,
+    SENHA_CLIENTE NVARCHAR(100) NULL,
+    NU_TELEFONE2 VARCHAR(30) NULL,
+    UF VARCHAR(2) NULL,
+    HR_BACKUP_DIARIO TIME(7) NULL,
+    ATIVO BIT NOT NULL CONSTRAINT DF_Clientes_ativo_47DBAE45 DEFAULT 1
+);
+GO
+
+CREATE TABLE dbo.Ocorrencias (
+    ID_OCORRENCIA INT IDENTITY(1,1) PRIMARY KEY, -- PK já cria um índice clustered automaticamente
+    ID_CLIENTE NVARCHAR(50) NULL,
+    TIPO_OCORRENCIA VARCHAR(255) NULL,
+    DATA_OCORRENCIA DATE NULL,
+    DESCRI_OCORRENCIA NVARCHAR(255) NULL,
+    SOLUCIONADO VARCHAR(5) NULL,
+    TIPO_BANCO NVARCHAR(10) NULL
+);
+GO
+
+CREATE UNIQUE NONCLUSTERED INDEX uc_nu_sac ON dbo.Clientes(NU_SAC);
+GO
+
+DECLARE @colName NVARCHAR(128);
+
+IF COL_LENGTH('dbo.Ocorrencias', 'id_ocorrencia') IS NOT NULL EXEC sp_rename 'dbo.Ocorrencias.id_ocorrencia', 'ID_OCORRENCIA', 'COLUMN';
+IF COL_LENGTH('dbo.Ocorrencias', 'id_cliente') IS NOT NULL EXEC sp_rename 'dbo.Ocorrencias.id_cliente', 'ID_CLIENTE', 'COLUMN';
+IF COL_LENGTH('dbo.Ocorrencias', 'tipo_ocorrencia') IS NOT NULL EXEC sp_rename 'dbo.Ocorrencias.tipo_ocorrencia', 'TIPO_OCORRENCIA', 'COLUMN';
+IF COL_LENGTH('dbo.Ocorrencias', 'data_ocorrencia') IS NOT NULL EXEC sp_rename 'dbo.Ocorrencias.data_ocorrencia', 'DATA_OCORRENCIA', 'COLUMN';
+IF COL_LENGTH('dbo.Ocorrencias', 'descri_ocorrencia') IS NOT NULL EXEC sp_rename 'dbo.Ocorrencias.descri_ocorrencia', 'DESCRI_OCORRENCIA', 'COLUMN';
+IF COL_LENGTH('dbo.Ocorrencias', 'solucionado') IS NOT NULL EXEC sp_rename 'dbo.Ocorrencias.solucionado', 'SOLUCIONADO', 'COLUMN';
+IF COL_LENGTH('dbo.Ocorrencias', 'tipo_banco') IS NOT NULL EXEC sp_rename 'dbo.Ocorrencias.tipo_banco', 'TIPO_BANCO', 'COLUMN';
+
+IF COL_LENGTH('dbo.Clientes', 'id_cliente') IS NOT NULL EXEC sp_rename 'dbo.Clientes.id_cliente', 'ID_CLIENTE', 'COLUMN';
+IF COL_LENGTH('dbo.Clientes', 'nome_cartorio') IS NOT NULL EXEC sp_rename 'dbo.Clientes.nome_cartorio', 'NOME_CARTORIO', 'COLUMN';
+IF COL_LENGTH('dbo.Clientes', 'nu_sac') IS NOT NULL EXEC sp_rename 'dbo.Clientes.nu_sac', 'NU_SAC', 'COLUMN';
+IF COL_LENGTH('dbo.Clientes', 'conta_nuvem') IS NOT NULL EXEC sp_rename 'dbo.Clientes.conta_nuvem', 'CONTA_NUVEM', 'COLUMN';
+IF COL_LENGTH('dbo.Clientes', 'nome_oficial') IS NOT NULL EXEC sp_rename 'dbo.Clientes.nome_oficial', 'NOME_OFICIAL', 'COLUMN';
+IF COL_LENGTH('dbo.Clientes', 'nu_telefone') IS NOT NULL EXEC sp_rename 'dbo.Clientes.nu_telefone', 'NU_TELEFONE', 'COLUMN';
+IF COL_LENGTH('dbo.Clientes', 'email_cliente') IS NOT NULL EXEC sp_rename 'dbo.Clientes.email_cliente', 'EMAIL_CLIENTE', 'COLUMN';
+IF COL_LENGTH('dbo.Clientes', 'usuario_cliente') IS NOT NULL EXEC sp_rename 'dbo.Clientes.usuario_cliente', 'USUARIO_CLIENTE', 'COLUMN';
+IF COL_LENGTH('dbo.Clientes', 'senha_cliente') IS NOT NULL EXEC sp_rename 'dbo.Clientes.senha_cliente', 'SENHA_CLIENTE', 'COLUMN';
+IF COL_LENGTH('dbo.Clientes', 'nu_telefone2') IS NOT NULL EXEC sp_rename 'dbo.Clientes.nu_telefone2', 'NU_TELEFONE2', 'COLUMN';
+IF COL_LENGTH('dbo.Clientes', 'uf') IS NOT NULL EXEC sp_rename 'dbo.Clientes.uf', 'UF', 'COLUMN';
+IF COL_LENGTH('dbo.Clientes', 'hr_backup_diario') IS NOT NULL EXEC sp_rename 'dbo.Clientes.hr_backup_diario', 'HR_BACKUP_DIARIO', 'COLUMN';
+IF COL_LENGTH('dbo.Clientes', 'ativo') IS NOT NULL EXEC sp_rename 'dbo.Clientes.ativo', 'ATIVO', 'COLUMN';
+
+GO
