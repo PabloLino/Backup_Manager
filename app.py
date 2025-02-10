@@ -75,7 +75,7 @@ class Aplicacao(tk.Tk):
     def abrir_tela(self, event):
         funcionalidade = self.combo_funcionalidades.get()
 
-        if self.usuario_logado == "admin":  # Acesso total
+        if self.usuario_logado == "*****":  # Acesso total
             funcionalidades_completas = ["Menu", "Cadastrar Cliente", "Registrar Ocorrência", "Consultar Clientes", "Consultar Ocorrências"]
         else:  # Acesso limitado
             funcionalidades_completas = ["Menu", "Consultar Clientes", "Consultar Ocorrências"]
@@ -102,7 +102,7 @@ class Aplicacao(tk.Tk):
         self.tela_atual.pack(fill=tk.BOTH, expand=True)
 
     def autenticar(self, usuario, senha):
-        if usuario == "admin" and senha == "Extr@bkp":
+        if usuario == "*****" and senha == "E*******":
             self.usuario_logado = "admin"
         else:
             self.usuario_logado = "visitante"
