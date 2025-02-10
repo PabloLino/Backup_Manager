@@ -19,5 +19,3 @@ Tela para consultar dados dos clientes:
 
 Tela para consultar histórico de ocorrências:
 ![image](https://github.com/user-attachments/assets/cfaad3c0-9cf2-4ece-a2fe-39451f45ee26)
-
---> atualmente estou criando uma nova tela com integração do Google Cloud API, para gerar automaticamente um relatório de documentos (Backups) dos clientes que foram enviados para a nuvem.
